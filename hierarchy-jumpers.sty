@@ -16,7 +16,7 @@
 \AtBeginDocument{\hypersetup{pageanchor=true}}
 
 % assure there is a appendix routine
-\AtBeginDocument{%
+\AtEndPreamble{%
    \ifcsname ifappendix\endcsname\else\newif\ifappendix\fi
 }
 \preto\appendix{\appendixtrue}
