@@ -34,13 +34,15 @@
 \AtEndDocument{\hjs@dumpcurrentsection@subsection}
 
 \RequirePackage{xcolor}
+\colorlet{hierarchy@col@up}{gray!30!white}
+\colorlet{hierarchy@col@down}{gray!30!white}
 \ifhjs@usefontawesome
 \RequirePackage{fontawesome}
-\def\hierarchy@up{\textcolor{gray!30!white}{\normalfont\normalsize\faAngleUp}}
-\def\hierarchy@down{\textcolor{gray!30!white}{\normalfont\normalsize\faAngleDown}}
+\def\hierarchy@up{\textcolor{hierarchy@col@up}{\normalfont\normalsize\faAngleUp}}
+\def\hierarchy@down{\textcolor{hierarchy@col@down}{\normalfont\normalsize\faAngleDown}}
 \else
-\def\hierarchy@up{\textcolor{gray!30!white}{\normalfont\normalsize\textbullet}}
-\def\hierarchy@down{\textcolor{gray!30!white}{\normalfont\normalsize\textbullet}}
+\def\hierarchy@up{\textcolor{hierarchy@col@up}{\normalfont\normalsize\textbullet}}
+\def\hierarchy@down{\textcolor{hierarchy@col@down}{\normalfont\normalsize\textbullet}}
 \fi
 
 \providecommand\hjs@total@chapter{0}
