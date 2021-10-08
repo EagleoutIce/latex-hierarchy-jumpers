@@ -74,9 +74,9 @@
 }}}}}}
 
 % chapter
-\def\hjs@chapname#1{\ifappendix appendix\else chapter\fi.\ifappendix\expandafter\@Alph\fi{#1}}
+\def\hjs@chapname#1{\ifappendix appendix\else chapter\fi.\ifappendix\@Alph{#1}\else#1\fi}
 \def\hjs@chap@prev{\hjs@chapname{\the\numexpr\c@chapter-1}}
-\def\hjs@chap@current{\hjs@chapname{\c@chapter}}
+\def\hjs@chap@current{\hjs@chapname{\number\c@chapter}}
 \def\hjs@chap@next{\hjs@chapname{\the\numexpr\c@chapter+1}}
 \def\hjs@chap@lastmain{chapter.\hjs@total@chapter}
 \def\hjs@chap@firstapp{appendix.A}
