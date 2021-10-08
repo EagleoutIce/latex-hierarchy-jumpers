@@ -13,7 +13,7 @@
 \RequirePackage{etoolbox}
 
 % requires hyperref, but does not load it!
-\AtEndPreamble{\hypersetup{pageanchor=true}}
+\AtEndPreamble{\@ifundefined{ifappendix}{\newif\ifappendix}\relax\hypersetup{pageanchor=true}}
 
 % assure there is a appendix routine
 \preto\appendix{\appendixtrue}
@@ -70,7 +70,6 @@
 \hjs@hyperlink{#2}{\makebox[\wd0]{%
   \null\hfill\hierarchy@down\hfill\null
 }}}}}}
-
 
 % chapter
 \def\hjs@chap@prev{\ifappendix appendix\else chapter\fi.\ifappendix\@Alph{\the\numexpr\c@chapter-1\relax}\else\the\numexpr\c@chapter-1\relax\fi}
