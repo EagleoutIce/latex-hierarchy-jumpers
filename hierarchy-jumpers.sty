@@ -1,0 +1,130 @@
+\def\filename{hierarchy-jumpers}
+\ProvidesPackage{\filename}[2021/10/08 EagleoutIce - jump through the hierarchies]
+
+\newif\ifhjs@disable
+\DeclareOption{enable}{\hjs@disablefalse}
+\DeclareOption{disable}{\hjs@disabletrue}
+
+\newif\ifhjs@usefontawesome
+\DeclareOption{usefa}{\hjs@usefontawesometrue}
+\DeclareOption{nousefa}{\hjs@usefontawesomefalse}
+\ProcessOptions
+
+\RequirePackage{etoolbox}
+
+% requires hyperref, but does not load it!
+\AtBeginDocument{\hypersetup{pageanchor=true}}
+
+% assure there is a appendix routine
+\AtBeginDocument{%
+   \ifcsname ifappendix\endcsname\else\newif\ifappendix\fi
+}
+\preto\appendix{\appendixtrue}
+
+% TODO: currently requires chapters and koma
+\def\hjs@xdef#1#2{\expandafter\gdef\csname #1\endcsname{#2}}
+\def\hjs@dumpcurrentchapter@section{\immediate\write\@auxout{\noexpand\hjs@xdef{hjs@sic@\thechapter}{\number\c@section}}}
+\def\hjs@dumpcurrentsection@subsection{\immediate\write\@auxout{\noexpand\hjs@xdef{hjs@suse@\thesection}{\number\c@subsection}}}
+\preto\part{\hjs@dumpcurrentchapter@section}
+\preto\chapter{\hjs@dumpcurrentchapter@section}
+\preto\appendix{\hjs@dumpcurrentchapter@section}
+\AtEndDocument{\hjs@dumpcurrentchapter@section}
+
+\preto\part{\hjs@dumpcurrentsection@subsection}
+\preto\chapter{\hjs@dumpcurrentsection@subsection}
+\preto\section{\hjs@dumpcurrentsection@subsection}
+\preto\appendix{\hjs@dumpcurrentsection@subsection}
+\AtEndDocument{\hjs@dumpcurrentsection@subsection}
+
+\RequirePackage{xcolor}
+\ifhjs@usefontawesome
+\RequirePackage{fontawesome}
+\def\hierarchy@up{\textcolor{gray!30!white}{\normalfont\normalsize\faAngleUp}}
+\def\hierarchy@down{\textcolor{gray!30!white}{\normalfont\normalsize\faAngleDown}}
+\else
+\def\hierarchy@up{\textcolor{gray!30!white}{\normalfont\normalsize\textbullet}}
+\def\hierarchy@down{\textcolor{gray!30!white}{\normalfont\normalsize\textbullet}}
+\fi
+
+\providecommand\hjs@total@chapter{0}
+\providecommand\hjs@total@chapter@appendix{0}
+
+\def\hjs@RecordChapter{\immediate\write\@auxout{\noexpand\hjs@xdef{hjs@total@chapter}{\number\c@chapter}}}
+\preto\appendix{\hjs@RecordChapter\gdef\hjs@RecordChapter{\immediate\write\@auxout{\noexpand\hjs@xdef{hjs@total@chapter@appendix}{\number\c@chapter}}}}
+\AtEndDocument{\hjs@RecordChapter}
+
+% the basic jumpers
+\AtBeginDocument{\let\hjs@hyperlink\hyperlink}
+
+% minor corrections
+\let\hjs@shift@up\z@
+\def\hjs@shift@down{-.25ex}
+
+% #1 is number. #2 is linktarget
+\def\hjs@linkup#1#2{\savebox0{#1}%
+\rlap{%rlapping box
+\smash{\raisebox{\dimexpr\ht0+\hjs@shift@up}{% get it in the air; no depth
+\hjs@hyperlink{#2}{\makebox[\wd0]{%
+  \null\hfill\hierarchy@up\hfill\null
+}}}}}}
+\def\hjs@linkdown#1#2{\savebox0{#1}%
+\rlap{%
+\smash{\raisebox{\dimexpr-\dp0-\height+\hjs@shift@down}{% get in the ground
+\hjs@hyperlink{#2}{\makebox[\wd0]{%
+  \null\hfill\hierarchy@down\hfill\null
+}}}}}}
+
+
+% chapter
+\def\hjs@chap@prev{\ifappendix appendix\else chapter\fi.\ifappendix\@Alph{\the\numexpr\c@chapter-1\relax}\else\the\numexpr\c@chapter-1\relax\fi}
+\def\hjs@chap@current{\ifappendix appendix\else chapter\fi.\thechapter}
+\def\hjs@chap@next{\ifappendix appendix\else chapter\fi.\ifappendix\@Alph{\the\numexpr\c@chapter+1\relax}\else\the\numexpr\c@chapter+1\relax\fi}
+\def\hjs@chap@lastmain{chapter.\hjs@total@chapter}
+\def\hjs@chap@firstapp{appendix.A}
+
+% section
+\def\hjs@sec@next{section.\thechapter.\the\numexpr\c@section+1\relax}
+\def\hjs@sec@prev{section.\thechapter.\the\numexpr\c@section-1\relax}
+\def\hjs@sec@current{section.\thechapter.\number\c@section}
+
+% subsection
+\def\hjs@subsec@prev{subsection.\thechapter.\number\c@section.\the\numexpr\c@subsection-1\relax}
+\def\hjs@subsec@next{subsection.\thechapter.\number\c@section.\the\numexpr\c@subsection+1\relax}
+
+\def\hjs@chapterlinkup{\ifnum\c@chapter>1\relax
+\hjs@linkup{\thechapter}{\hjs@chap@prev}%
+\else% appendix break
+\ifappendix\ifnum\c@chapter=1\relax
+\hjs@linkup{\thechapter}{\hjs@chap@lastmain}% link to last
+\fi\fi
+\fi}
+
+\def\hjs@chapterlinkupsame{\hjs@linkup{\thechapter}{\hjs@chap@current}}%
+\def\hjs@chapterlinkdown{\ifappendix\def\@tmp{\hjs@total@chapter@appendix}\else\def\@tmp{\hjs@total@chapter}\fi
+\ifnum\c@chapter<\@tmp% down link, if there is a next one
+\hjs@linkdown{\thechapter}{\hjs@chap@next}%
+\else% check if we are at the appendix break:
+\ifappendix\else
+\ifnum\hjs@total@chapter@appendix>0\relax
+\hjs@linkdown{\thechapter}{\hjs@chap@firstapp}%
+\fi\fi
+\fi% up link if prev
+}
+
+\def\hjs@sectionlinkup{\ifnum\c@section>1 \hjs@linkup{\number\c@section}{\hjs@sec@prev}\fi}
+\def\hjs@sectionlinkdown{\ifcsname hjs@sic@\thechapter\endcsname \edef\@tmp{\csname hjs@sic@\thechapter\endcsname}\else\def\@tmp{0}\fi \ifnum\c@section<\@tmp\relax \hjs@linkdown{\number\c@section}{\hjs@sec@next}\fi}
+
+\def\hjs@sectionlinkupsame{\hjs@linkup{\number\c@section}{\hjs@sec@current}}%
+\def\hjs@subsectionlinkup{\ifnum\c@subsection>1 \hjs@linkup{\number\c@subsection}{\hjs@subsec@prev}\fi}
+\def\hjs@subsectionlinkdown{\ifcsname hjs@suse@\thesection\endcsname \edef\@tmp{\@nameuse{hjs@suse@\thesection}}\else\def\@tmp{0}\fi \ifnum\c@subsection<\@tmp \hjs@linkdown{\number\c@subsection}{\hjs@subsec@next}\fi}%
+
+% does still provide the defs so they might be used; otherwise the package can be
+% excluded
+\ifhjs@disable\endinput\fi
+
+\patchcmd\chapterformat{\thechapter}{\hjs@chapterlinkup\hjs@chapterlinkdown\thechapter}\relax\relax
+\def\sectionformat{\mbox{\hjs@chapterlinkupsame\hjs@chapterlinkdown\thechapter.\hjs@sectionlinkup\hjs@sectionlinkdown\number\c@section\autodot\enskip}}
+\def\subsectionformat{\mbox{\hjs@chapterlinkupsame\hjs@chapterlinkdown\thechapter.\hjs@sectionlinkupsame\hjs@sectionlinkdown\number\c@section.\hjs@subsectionlinkup\hjs@subsectionlinkdown\number\c@subsection\autodot\enskip}}
+
+
+\endinput
