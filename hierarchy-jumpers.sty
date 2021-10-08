@@ -13,12 +13,9 @@
 \RequirePackage{etoolbox}
 
 % requires hyperref, but does not load it!
-\AtBeginDocument{\hypersetup{pageanchor=true}}
+\AtEndPreamble{\hypersetup{pageanchor=true}}
 
 % assure there is a appendix routine
-\AtEndPreamble{%
-   \ifcsname ifappendix\endcsname\else\newif\ifappendix\fi
-}
 \preto\appendix{\appendixtrue}
 
 % TODO: currently requires chapters and koma
@@ -122,7 +119,8 @@
 % excluded
 \ifhjs@disable\endinput\fi
 
-\patchcmd\chapterformat{\thechapter}{\hjs@chapterlinkup\hjs@chapterlinkdown\thechapter}\relax\relax
+\def\hjs@linkedchapter{\hjs@chapterlinkup\hjs@chapterlinkdown\thechapter}
+\patchcmd\chapterformat{\thechapter}{\hjs@linkedchapter}\relax\relax
 \def\sectionformat{\mbox{\hjs@chapterlinkupsame\hjs@chapterlinkdown\thechapter.\hjs@sectionlinkup\hjs@sectionlinkdown\number\c@section\autodot\enskip}}
 \def\subsectionformat{\mbox{\hjs@chapterlinkupsame\hjs@chapterlinkdown\thechapter.\hjs@sectionlinkupsame\hjs@sectionlinkdown\number\c@section.\hjs@subsectionlinkup\hjs@subsectionlinkdown\number\c@subsection\autodot\enskip}}
 
