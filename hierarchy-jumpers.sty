@@ -72,20 +72,21 @@
 }}}}}}
 
 % chapter
-\def\hjs@chap@prev{\ifappendix appendix\else chapter\fi.\ifappendix\@Alph{\the\numexpr\c@chapter-1\relax}\else\the\numexpr\c@chapter-1\relax\fi}
-\def\hjs@chap@current{\ifappendix appendix\else chapter\fi.\thechapter}
-\def\hjs@chap@next{\ifappendix appendix\else chapter\fi.\ifappendix\@Alph{\the\numexpr\c@chapter+1\relax}\else\the\numexpr\c@chapter+1\relax\fi}
+\def\hjs@chapname#1{\ifappendix appendix\else chapter\fi.\ifappendix\expandafter\@Alph\fi{#1}}
+\def\hjs@chap@prev{\hjs@chapname{\the\numexpr\c@chapter-1}}
+\def\hjs@chap@current{\hjs@chapname{\c@chapter}}
+\def\hjs@chap@next{\hjs@chapname{\the\numexpr\c@chapter+1}}
 \def\hjs@chap@lastmain{chapter.\hjs@total@chapter}
 \def\hjs@chap@firstapp{appendix.A}
 
 % section
-\def\hjs@sec@next{section.\thechapter.\the\numexpr\c@section+1\relax}
-\def\hjs@sec@prev{section.\thechapter.\the\numexpr\c@section-1\relax}
+\def\hjs@sec@next{section.\thechapter.\the\numexpr\c@section+1}
+\def\hjs@sec@prev{section.\thechapter.\the\numexpr\c@section-1}
 \def\hjs@sec@current{section.\thechapter.\number\c@section}
 
 % subsection
-\def\hjs@subsec@prev{subsection.\thechapter.\number\c@section.\the\numexpr\c@subsection-1\relax}
-\def\hjs@subsec@next{subsection.\thechapter.\number\c@section.\the\numexpr\c@subsection+1\relax}
+\def\hjs@subsec@prev{subsection.\thechapter.\number\c@section.\the\numexpr\c@subsection-1}
+\def\hjs@subsec@next{subsection.\thechapter.\number\c@section.\the\numexpr\c@subsection+1}
 
 \def\hjs@chapterlinkup{\ifnum\c@chapter>1\relax
 \hjs@linkup{\thechapter}{\hjs@chap@prev}%
