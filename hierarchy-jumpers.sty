@@ -13,24 +13,27 @@
 \RequirePackage{etoolbox}
 
 % requires hyperref, but does not load it!
-\AtEndPreamble{\@ifundefined{ifappendix}{\newif\ifappendix}\relax\hypersetup{pageanchor=true}}
+\AtEndPreamble{\@ifundefined{ifappendix}{\newif\ifappendix}{}\hypersetup{pageanchor=true}}
 
 % assure there is a appendix routine
 \preto\appendix{\appendixtrue}
 
 % TODO: currently requires chapters and koma
-\def\hjs@xdef#1#2{\expandafter\gdef\csname #1\endcsname{#2}}
-\def\hjs@dumpcurrentchapter@section{\immediate\write\@auxout{\noexpand\hjs@xdef{hjs@sic@\thechapter}{\number\c@section}}}
-\def\hjs@dumpcurrentsection@subsection{\immediate\write\@auxout{\noexpand\hjs@xdef{hjs@suse@\thesection}{\number\c@subsection}}}
-\preto\part{\hjs@dumpcurrentchapter@section}
-\preto\chapter{\hjs@dumpcurrentchapter@section}
-\preto\appendix{\hjs@dumpcurrentchapter@section}
+\def\hjs@gdef#1#2{\expandafter\gdef\csname#1\endcsname{#2}}
+\def\hjs@dumpcurrentchapter@section{\immediate\write\@auxout{\noexpand\hjs@gdef{hjs@sic@\thechapter}{\number\c@section}}}
+\def\hjs@dumpcurrentsection@subsection{\immediate\write\@auxout{\noexpand\hjs@gdef{hjs@suse@\thesection}{\number\c@subsection}}}
+
+\def\prependIf#1#2{\ifcsname#1\endcsname \expandafter\preto\csname#1\endcsname{#2}\fi}
+
+\prependIf{part}{\hjs@dumpcurrentchapter@section}
+\prependIf{chapter}{\hjs@dumpcurrentchapter@section}
+\prependIf{appendix}{\hjs@dumpcurrentchapter@section}
 \AtEndDocument{\hjs@dumpcurrentchapter@section}
 
-\preto\part{\hjs@dumpcurrentsection@subsection}
-\preto\chapter{\hjs@dumpcurrentsection@subsection}
-\preto\section{\hjs@dumpcurrentsection@subsection}
-\preto\appendix{\hjs@dumpcurrentsection@subsection}
+\prependIf{part}{\hjs@dumpcurrentsection@subsection}
+\prependIf{chapter}{\hjs@dumpcurrentsection@subsection}
+\prependIf{section}{\hjs@dumpcurrentsection@subsection}
+\prependIf{appendix}{\hjs@dumpcurrentsection@subsection}
 \AtEndDocument{\hjs@dumpcurrentsection@subsection}
 
 \RequirePackage{xcolor}
@@ -45,12 +48,14 @@
 \def\hierarchy@down{\textcolor{hierarchy@col@down}{\normalfont\normalsize\textbullet}}
 \fi
 
-\providecommand\hjs@total@chapter{0}
-\providecommand\hjs@total@chapter@appendix{0}
+\ifcsname chapter\endcsname
+  \providecommand\hjs@total@chapter{0}
+  \providecommand\hjs@total@chapter@appendix{0}
 
-\def\hjs@RecordChapter{\immediate\write\@auxout{\noexpand\hjs@xdef{hjs@total@chapter}{\number\c@chapter}}}
-\preto\appendix{\hjs@RecordChapter\gdef\hjs@RecordChapter{\immediate\write\@auxout{\noexpand\hjs@xdef{hjs@total@chapter@appendix}{\number\c@chapter}}}}
-\AtEndDocument{\hjs@RecordChapter}
+  \def\hjs@RecordChapter{\immediate\write\@auxout{\noexpand\hjs@gdef{hjs@total@chapter}{\number\c@chapter}}}
+  \preto\appendix{\hjs@RecordChapter\gdef\hjs@RecordChapter{\immediate\write\@auxout{\noexpand\hjs@gdef{hjs@total@chapter@appendix}{\number\c@chapter}}}}
+  \AtEndDocument{\hjs@RecordChapter}
+\fi
 
 % the basic jumpers
 \AtBeginDocument{\let\hjs@hyperlink\hyperlink}
@@ -125,6 +130,5 @@
 \patchcmd\chapterformat{\thechapter}{\hjs@linkedchapter}\relax\relax
 \def\sectionformat{\mbox{\hjs@chapterlinkupsame\hjs@chapterlinkdown\thechapter.\hjs@sectionlinkup\hjs@sectionlinkdown\number\c@section\autodot\enskip}}
 \def\subsectionformat{\mbox{\hjs@chapterlinkupsame\hjs@chapterlinkdown\thechapter.\hjs@sectionlinkupsame\hjs@sectionlinkdown\number\c@section.\hjs@subsectionlinkup\hjs@subsectionlinkdown\number\c@subsection\autodot\enskip}}
-
 
 \endinput
